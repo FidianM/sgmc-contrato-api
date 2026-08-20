@@ -288,6 +288,9 @@ components:
         valor:
           type: string
           pattern: ^-?\d{1,13}\.\d{2}$
+          description: Importe con exactamente dos decimales
+          examples:
+            - "1004.62"
         moneda:
           type: string
           const: GTQ
@@ -296,6 +299,9 @@ components:
         - moneda
       additionalProperties: false
       description: Objeto monetario expresado en quetzales
+      examples:
+        - valor: "1004.62"
+          moneda: GTQ
     ErrorDetalle:
       type: object
       properties:
@@ -388,6 +394,9 @@ components:
             valor:
               type: string
               pattern: ^-?\d{1,13}\.\d{2}$
+              description: Importe con exactamente dos decimales
+              examples:
+                - "1004.62"
             moneda:
               type: string
               const: GTQ
@@ -396,6 +405,9 @@ components:
             - moneda
           additionalProperties: false
           description: Objeto monetario expresado en quetzales
+          examples:
+            - valor: "1004.62"
+              moneda: GTQ
         fechaPago:
           type: string
           format: date
@@ -432,6 +444,9 @@ components:
             valor:
               type: string
               pattern: ^-?\d{1,13}\.\d{2}$
+              description: Importe con exactamente dos decimales
+              examples:
+                - "1004.62"
             moneda:
               type: string
               const: GTQ
@@ -440,12 +455,18 @@ components:
             - moneda
           additionalProperties: false
           description: Objeto monetario expresado en quetzales
+          examples:
+            - valor: "1004.62"
+              moneda: GTQ
         interesMoratorio:
           type: object
           properties:
             valor:
               type: string
               pattern: ^-?\d{1,13}\.\d{2}$
+              description: Importe con exactamente dos decimales
+              examples:
+                - "1004.62"
             moneda:
               type: string
               const: GTQ
@@ -454,12 +475,18 @@ components:
             - moneda
           additionalProperties: false
           description: Objeto monetario expresado en quetzales
+          examples:
+            - valor: "1004.62"
+              moneda: GTQ
         interesCorriente:
           type: object
           properties:
             valor:
               type: string
               pattern: ^-?\d{1,13}\.\d{2}$
+              description: Importe con exactamente dos decimales
+              examples:
+                - "1004.62"
             moneda:
               type: string
               const: GTQ
@@ -468,12 +495,18 @@ components:
             - moneda
           additionalProperties: false
           description: Objeto monetario expresado en quetzales
+          examples:
+            - valor: "1004.62"
+              moneda: GTQ
         capital:
           type: object
           properties:
             valor:
               type: string
               pattern: ^-?\d{1,13}\.\d{2}$
+              description: Importe con exactamente dos decimales
+              examples:
+                - "1004.62"
             moneda:
               type: string
               const: GTQ
@@ -482,12 +515,18 @@ components:
             - moneda
           additionalProperties: false
           description: Objeto monetario expresado en quetzales
+          examples:
+            - valor: "1004.62"
+              moneda: GTQ
         excedente:
           type: object
           properties:
             valor:
               type: string
               pattern: ^-?\d{1,13}\.\d{2}$
+              description: Importe con exactamente dos decimales
+              examples:
+                - "1004.62"
             moneda:
               type: string
               const: GTQ
@@ -496,6 +535,9 @@ components:
             - moneda
           additionalProperties: false
           description: Objeto monetario expresado en quetzales
+          examples:
+            - valor: "1004.62"
+              moneda: GTQ
       required:
         - gastos
         - interesMoratorio
@@ -549,6 +591,9 @@ components:
             valor:
               type: string
               pattern: ^-?\d{1,13}\.\d{2}$
+              description: Importe con exactamente dos decimales
+              examples:
+                - "1004.62"
             moneda:
               type: string
               const: GTQ
@@ -557,6 +602,9 @@ components:
             - moneda
           additionalProperties: false
           description: Objeto monetario expresado en quetzales
+          examples:
+            - valor: "1004.62"
+              moneda: GTQ
         aplicacion:
           type: object
           properties:
@@ -566,6 +614,9 @@ components:
                 valor:
                   type: string
                   pattern: ^-?\d{1,13}\.\d{2}$
+                  description: Importe con exactamente dos decimales
+                  examples:
+                    - "1004.62"
                 moneda:
                   type: string
                   const: GTQ
@@ -574,12 +625,18 @@ components:
                 - moneda
               additionalProperties: false
               description: Objeto monetario expresado en quetzales
+              examples:
+                - valor: "1004.62"
+                  moneda: GTQ
             interesMoratorio:
               type: object
               properties:
                 valor:
                   type: string
                   pattern: ^-?\d{1,13}\.\d{2}$
+                  description: Importe con exactamente dos decimales
+                  examples:
+                    - "1004.62"
                 moneda:
                   type: string
                   const: GTQ
@@ -588,12 +645,18 @@ components:
                 - moneda
               additionalProperties: false
               description: Objeto monetario expresado en quetzales
+              examples:
+                - valor: "1004.62"
+                  moneda: GTQ
             interesCorriente:
               type: object
               properties:
                 valor:
                   type: string
                   pattern: ^-?\d{1,13}\.\d{2}$
+                  description: Importe con exactamente dos decimales
+                  examples:
+                    - "1004.62"
                 moneda:
                   type: string
                   const: GTQ
@@ -602,12 +665,18 @@ components:
                 - moneda
               additionalProperties: false
               description: Objeto monetario expresado en quetzales
+              examples:
+                - valor: "1004.62"
+                  moneda: GTQ
             capital:
               type: object
               properties:
                 valor:
                   type: string
                   pattern: ^-?\d{1,13}\.\d{2}$
+                  description: Importe con exactamente dos decimales
+                  examples:
+                    - "1004.62"
                 moneda:
                   type: string
                   const: GTQ
@@ -616,12 +685,18 @@ components:
                 - moneda
               additionalProperties: false
               description: Objeto monetario expresado en quetzales
+              examples:
+                - valor: "1004.62"
+                  moneda: GTQ
             excedente:
               type: object
               properties:
                 valor:
                   type: string
                   pattern: ^-?\d{1,13}\.\d{2}$
+                  description: Importe con exactamente dos decimales
+                  examples:
+                    - "1004.62"
                 moneda:
                   type: string
                   const: GTQ
@@ -630,6 +705,9 @@ components:
                 - moneda
               additionalProperties: false
               description: Objeto monetario expresado en quetzales
+              examples:
+                - valor: "1004.62"
+                  moneda: GTQ
           required:
             - gastos
             - interesMoratorio
@@ -645,6 +723,9 @@ components:
             valor:
               type: string
               pattern: ^-?\d{1,13}\.\d{2}$
+              description: Importe con exactamente dos decimales
+              examples:
+                - "1004.62"
             moneda:
               type: string
               const: GTQ
@@ -653,6 +734,9 @@ components:
             - moneda
           additionalProperties: false
           description: Objeto monetario expresado en quetzales
+          examples:
+            - valor: "1004.62"
+              moneda: GTQ
         estadoCredito:
           type: string
           enum:
@@ -742,6 +826,9 @@ components:
             valor:
               type: string
               pattern: ^-?\d{1,13}\.\d{2}$
+              description: Importe con exactamente dos decimales
+              examples:
+                - "1004.62"
             moneda:
               type: string
               const: GTQ
@@ -750,6 +837,9 @@ components:
             - moneda
           additionalProperties: false
           description: Objeto monetario expresado en quetzales
+          examples:
+            - valor: "1004.62"
+              moneda: GTQ
       required:
         - tramo
         - creditos
@@ -771,6 +861,9 @@ components:
             valor:
               type: string
               pattern: ^-?\d{1,13}\.\d{2}$
+              description: Importe con exactamente dos decimales
+              examples:
+                - "1004.62"
             moneda:
               type: string
               const: GTQ
@@ -779,12 +872,18 @@ components:
             - moneda
           additionalProperties: false
           description: Objeto monetario expresado en quetzales
+          examples:
+            - valor: "1004.62"
+              moneda: GTQ
         saldoEnRiesgo:
           type: object
           properties:
             valor:
               type: string
               pattern: ^-?\d{1,13}\.\d{2}$
+              description: Importe con exactamente dos decimales
+              examples:
+                - "1004.62"
             moneda:
               type: string
               const: GTQ
@@ -793,6 +892,9 @@ components:
             - moneda
           additionalProperties: false
           description: Objeto monetario expresado en quetzales
+          examples:
+            - valor: "1004.62"
+              moneda: GTQ
         porcentajeEnRiesgo:
           type: number
           minimum: 0
@@ -806,6 +908,9 @@ components:
             valor:
               type: string
               pattern: ^-?\d{1,13}\.\d{2}$
+              description: Importe con exactamente dos decimales
+              examples:
+                - "1004.62"
             moneda:
               type: string
               const: GTQ
@@ -814,6 +919,9 @@ components:
             - moneda
           additionalProperties: false
           description: Objeto monetario expresado en quetzales
+          examples:
+            - valor: "1004.62"
+              moneda: GTQ
         porTramo:
           type: array
           items:
@@ -839,6 +947,9 @@ components:
                   valor:
                     type: string
                     pattern: ^-?\d{1,13}\.\d{2}$
+                    description: Importe con exactamente dos decimales
+                    examples:
+                      - "1004.62"
                   moneda:
                     type: string
                     const: GTQ
@@ -847,6 +958,9 @@ components:
                   - moneda
                 additionalProperties: false
                 description: Objeto monetario expresado en quetzales
+                examples:
+                  - valor: "1004.62"
+                    moneda: GTQ
             required:
               - tramo
               - creditos

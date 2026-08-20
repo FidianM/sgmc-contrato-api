@@ -404,7 +404,11 @@
         "properties": {
           "valor": {
             "type": "string",
-            "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+            "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+            "description": "Importe con exactamente dos decimales",
+            "examples": [
+              "1004.62"
+            ]
           },
           "moneda": {
             "type": "string",
@@ -416,7 +420,13 @@
           "moneda"
         ],
         "additionalProperties": false,
-        "description": "Objeto monetario expresado en quetzales"
+        "description": "Objeto monetario expresado en quetzales",
+        "examples": [
+          {
+            "valor": "1004.62",
+            "moneda": "GTQ"
+          }
+        ]
       },
       "ErrorDetalle": {
         "type": "object",
@@ -539,7 +549,11 @@
             "properties": {
               "valor": {
                 "type": "string",
-                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                "description": "Importe con exactamente dos decimales",
+                "examples": [
+                  "1004.62"
+                ]
               },
               "moneda": {
                 "type": "string",
@@ -551,7 +565,13 @@
               "moneda"
             ],
             "additionalProperties": false,
-            "description": "Objeto monetario expresado en quetzales"
+            "description": "Objeto monetario expresado en quetzales",
+            "examples": [
+              {
+                "valor": "1004.62",
+                "moneda": "GTQ"
+              }
+            ]
           },
           "fechaPago": {
             "type": "string",
@@ -597,7 +617,11 @@
             "properties": {
               "valor": {
                 "type": "string",
-                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                "description": "Importe con exactamente dos decimales",
+                "examples": [
+                  "1004.62"
+                ]
               },
               "moneda": {
                 "type": "string",
@@ -609,14 +633,24 @@
               "moneda"
             ],
             "additionalProperties": false,
-            "description": "Objeto monetario expresado en quetzales"
+            "description": "Objeto monetario expresado en quetzales",
+            "examples": [
+              {
+                "valor": "1004.62",
+                "moneda": "GTQ"
+              }
+            ]
           },
           "interesMoratorio": {
             "type": "object",
             "properties": {
               "valor": {
                 "type": "string",
-                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                "description": "Importe con exactamente dos decimales",
+                "examples": [
+                  "1004.62"
+                ]
               },
               "moneda": {
                 "type": "string",
@@ -628,14 +662,24 @@
               "moneda"
             ],
             "additionalProperties": false,
-            "description": "Objeto monetario expresado en quetzales"
+            "description": "Objeto monetario expresado en quetzales",
+            "examples": [
+              {
+                "valor": "1004.62",
+                "moneda": "GTQ"
+              }
+            ]
           },
           "interesCorriente": {
             "type": "object",
             "properties": {
               "valor": {
                 "type": "string",
-                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                "description": "Importe con exactamente dos decimales",
+                "examples": [
+                  "1004.62"
+                ]
               },
               "moneda": {
                 "type": "string",
@@ -647,14 +691,24 @@
               "moneda"
             ],
             "additionalProperties": false,
-            "description": "Objeto monetario expresado en quetzales"
+            "description": "Objeto monetario expresado en quetzales",
+            "examples": [
+              {
+                "valor": "1004.62",
+                "moneda": "GTQ"
+              }
+            ]
           },
           "capital": {
             "type": "object",
             "properties": {
               "valor": {
                 "type": "string",
-                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                "description": "Importe con exactamente dos decimales",
+                "examples": [
+                  "1004.62"
+                ]
               },
               "moneda": {
                 "type": "string",
@@ -666,14 +720,24 @@
               "moneda"
             ],
             "additionalProperties": false,
-            "description": "Objeto monetario expresado en quetzales"
+            "description": "Objeto monetario expresado en quetzales",
+            "examples": [
+              {
+                "valor": "1004.62",
+                "moneda": "GTQ"
+              }
+            ]
           },
           "excedente": {
             "type": "object",
             "properties": {
               "valor": {
                 "type": "string",
-                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                "description": "Importe con exactamente dos decimales",
+                "examples": [
+                  "1004.62"
+                ]
               },
               "moneda": {
                 "type": "string",
@@ -685,7 +749,13 @@
               "moneda"
             ],
             "additionalProperties": false,
-            "description": "Objeto monetario expresado en quetzales"
+            "description": "Objeto monetario expresado en quetzales",
+            "examples": [
+              {
+                "valor": "1004.62",
+                "moneda": "GTQ"
+              }
+            ]
           }
         },
         "required": [
@@ -751,7 +821,11 @@
             "properties": {
               "valor": {
                 "type": "string",
-                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                "description": "Importe con exactamente dos decimales",
+                "examples": [
+                  "1004.62"
+                ]
               },
               "moneda": {
                 "type": "string",
@@ -763,7 +837,13 @@
               "moneda"
             ],
             "additionalProperties": false,
-            "description": "Objeto monetario expresado en quetzales"
+            "description": "Objeto monetario expresado en quetzales",
+            "examples": [
+              {
+                "valor": "1004.62",
+                "moneda": "GTQ"
+              }
+            ]
           },
           "aplicacion": {
             "type": "object",
@@ -773,7 +853,11 @@
                 "properties": {
                   "valor": {
                     "type": "string",
-                    "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                    "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                    "description": "Importe con exactamente dos decimales",
+                    "examples": [
+                      "1004.62"
+                    ]
                   },
                   "moneda": {
                     "type": "string",
@@ -785,14 +869,24 @@
                   "moneda"
                 ],
                 "additionalProperties": false,
-                "description": "Objeto monetario expresado en quetzales"
+                "description": "Objeto monetario expresado en quetzales",
+                "examples": [
+                  {
+                    "valor": "1004.62",
+                    "moneda": "GTQ"
+                  }
+                ]
               },
               "interesMoratorio": {
                 "type": "object",
                 "properties": {
                   "valor": {
                     "type": "string",
-                    "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                    "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                    "description": "Importe con exactamente dos decimales",
+                    "examples": [
+                      "1004.62"
+                    ]
                   },
                   "moneda": {
                     "type": "string",
@@ -804,14 +898,24 @@
                   "moneda"
                 ],
                 "additionalProperties": false,
-                "description": "Objeto monetario expresado en quetzales"
+                "description": "Objeto monetario expresado en quetzales",
+                "examples": [
+                  {
+                    "valor": "1004.62",
+                    "moneda": "GTQ"
+                  }
+                ]
               },
               "interesCorriente": {
                 "type": "object",
                 "properties": {
                   "valor": {
                     "type": "string",
-                    "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                    "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                    "description": "Importe con exactamente dos decimales",
+                    "examples": [
+                      "1004.62"
+                    ]
                   },
                   "moneda": {
                     "type": "string",
@@ -823,14 +927,24 @@
                   "moneda"
                 ],
                 "additionalProperties": false,
-                "description": "Objeto monetario expresado en quetzales"
+                "description": "Objeto monetario expresado en quetzales",
+                "examples": [
+                  {
+                    "valor": "1004.62",
+                    "moneda": "GTQ"
+                  }
+                ]
               },
               "capital": {
                 "type": "object",
                 "properties": {
                   "valor": {
                     "type": "string",
-                    "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                    "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                    "description": "Importe con exactamente dos decimales",
+                    "examples": [
+                      "1004.62"
+                    ]
                   },
                   "moneda": {
                     "type": "string",
@@ -842,14 +956,24 @@
                   "moneda"
                 ],
                 "additionalProperties": false,
-                "description": "Objeto monetario expresado en quetzales"
+                "description": "Objeto monetario expresado en quetzales",
+                "examples": [
+                  {
+                    "valor": "1004.62",
+                    "moneda": "GTQ"
+                  }
+                ]
               },
               "excedente": {
                 "type": "object",
                 "properties": {
                   "valor": {
                     "type": "string",
-                    "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                    "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                    "description": "Importe con exactamente dos decimales",
+                    "examples": [
+                      "1004.62"
+                    ]
                   },
                   "moneda": {
                     "type": "string",
@@ -861,7 +985,13 @@
                   "moneda"
                 ],
                 "additionalProperties": false,
-                "description": "Objeto monetario expresado en quetzales"
+                "description": "Objeto monetario expresado en quetzales",
+                "examples": [
+                  {
+                    "valor": "1004.62",
+                    "moneda": "GTQ"
+                  }
+                ]
               }
             },
             "required": [
@@ -879,7 +1009,11 @@
             "properties": {
               "valor": {
                 "type": "string",
-                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                "description": "Importe con exactamente dos decimales",
+                "examples": [
+                  "1004.62"
+                ]
               },
               "moneda": {
                 "type": "string",
@@ -891,7 +1025,13 @@
               "moneda"
             ],
             "additionalProperties": false,
-            "description": "Objeto monetario expresado en quetzales"
+            "description": "Objeto monetario expresado en quetzales",
+            "examples": [
+              {
+                "valor": "1004.62",
+                "moneda": "GTQ"
+              }
+            ]
           },
           "estadoCredito": {
             "type": "string",
@@ -1001,7 +1141,11 @@
             "properties": {
               "valor": {
                 "type": "string",
-                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                "description": "Importe con exactamente dos decimales",
+                "examples": [
+                  "1004.62"
+                ]
               },
               "moneda": {
                 "type": "string",
@@ -1013,7 +1157,13 @@
               "moneda"
             ],
             "additionalProperties": false,
-            "description": "Objeto monetario expresado en quetzales"
+            "description": "Objeto monetario expresado en quetzales",
+            "examples": [
+              {
+                "valor": "1004.62",
+                "moneda": "GTQ"
+              }
+            ]
           }
         },
         "required": [
@@ -1040,7 +1190,11 @@
             "properties": {
               "valor": {
                 "type": "string",
-                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                "description": "Importe con exactamente dos decimales",
+                "examples": [
+                  "1004.62"
+                ]
               },
               "moneda": {
                 "type": "string",
@@ -1052,14 +1206,24 @@
               "moneda"
             ],
             "additionalProperties": false,
-            "description": "Objeto monetario expresado en quetzales"
+            "description": "Objeto monetario expresado en quetzales",
+            "examples": [
+              {
+                "valor": "1004.62",
+                "moneda": "GTQ"
+              }
+            ]
           },
           "saldoEnRiesgo": {
             "type": "object",
             "properties": {
               "valor": {
                 "type": "string",
-                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                "description": "Importe con exactamente dos decimales",
+                "examples": [
+                  "1004.62"
+                ]
               },
               "moneda": {
                 "type": "string",
@@ -1071,7 +1235,13 @@
               "moneda"
             ],
             "additionalProperties": false,
-            "description": "Objeto monetario expresado en quetzales"
+            "description": "Objeto monetario expresado en quetzales",
+            "examples": [
+              {
+                "valor": "1004.62",
+                "moneda": "GTQ"
+              }
+            ]
           },
           "porcentajeEnRiesgo": {
             "type": "number",
@@ -1087,7 +1257,11 @@
             "properties": {
               "valor": {
                 "type": "string",
-                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                "description": "Importe con exactamente dos decimales",
+                "examples": [
+                  "1004.62"
+                ]
               },
               "moneda": {
                 "type": "string",
@@ -1099,7 +1273,13 @@
               "moneda"
             ],
             "additionalProperties": false,
-            "description": "Objeto monetario expresado en quetzales"
+            "description": "Objeto monetario expresado en quetzales",
+            "examples": [
+              {
+                "valor": "1004.62",
+                "moneda": "GTQ"
+              }
+            ]
           },
           "porTramo": {
             "type": "array",
@@ -1128,7 +1308,11 @@
                   "properties": {
                     "valor": {
                       "type": "string",
-                      "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                      "pattern": "^-?\\d{1,13}\\.\\d{2}$",
+                      "description": "Importe con exactamente dos decimales",
+                      "examples": [
+                        "1004.62"
+                      ]
                     },
                     "moneda": {
                       "type": "string",
@@ -1140,7 +1324,13 @@
                     "moneda"
                   ],
                   "additionalProperties": false,
-                  "description": "Objeto monetario expresado en quetzales"
+                  "description": "Objeto monetario expresado en quetzales",
+                  "examples": [
+                    {
+                      "valor": "1004.62",
+                      "moneda": "GTQ"
+                    }
+                  ]
                 }
               },
               "required": [

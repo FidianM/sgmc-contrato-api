@@ -7,12 +7,22 @@ export const DineroSchema = z
       .regex(
         /^-?\d{1,13}\.\d{2}$/,
         'Debe ser una cadena decimal con 2 decimales exactos',
-      ),
+      )
+      .meta({
+        description: 'Importe con exactamente dos decimales',
+        examples: ['1004.62'],
+      }),
     moneda: z.literal('GTQ'),
   })
   .strict()
   .meta({
     description: 'Objeto monetario expresado en quetzales',
+    examples: [
+      {
+        valor: '1004.62',
+        moneda: 'GTQ',
+      },
+    ],
   });
 
 export const ErrorDetalleSchema = z
