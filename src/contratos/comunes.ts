@@ -1,25 +1,63 @@
 ﻿import { z } from 'zod';
 
-export const DineroSchema = z.object({
-  valor: z.string().regex(/^-?\d{1,13}\.\d{2}$/, 'Debe ser una cadena decimal con 2 decimales exactos'),
-  moneda: z.literal('GTQ'),
+export const DineroSchema = z
+  .object({
+    valor: z
+      .string()
+      .regex(
+        /^-?\d{1,13}\.\d{2}$/,
+        'Debe ser una cadena decimal con 2 decimales exactos',
+      ),
+    moneda: z.literal('GTQ'),
+  })
+  .strict()
+  .meta({
+    description: 'Objeto monetario expresado en quetzales',
+  });
+
+export const ErrorDetalleSchema = z
+  .object({
+    campo: z.string(),
+    mensaje: z.string(),
+  })
+  .strict();
+
+export const ProblemDetailsSchema = z
+  .object({
+    type: z.string().url(),
+    title: z.string(),
+    status: z.number().int().min(400).max(599),
+    detail: z.string().optional(),
+    instance: z.string().optional(),
+    traceId: z.string().optional(),
+    errores: z.array(ErrorDetalleSchema).optional(),
+  })
+  .strict()
+  .meta({
+    description: 'Cuerpo uniforme para las respuestas de error',
+  });
+
+export const FechaISOSchema = z.iso.date().meta({
+  description: 'Fecha calendario en formato AAAA-MM-DD',
+  examples: ['2026-08-22'],
 });
 
-export const ErrorDetalleSchema = z.object({
-  campo: z.string(),
-  mensaje: z.string(),
-});
+export const InstanteISOSchema = z.iso
+  .datetime({ offset: true })
+  .meta({
+    description: 'Fecha y hora ISO 8601 con zona horaria',
+    examples: ['2026-08-22T09:15:00-06:00'],
+  });
 
-export const ProblemDetailsSchema = z.object({
-  type: z.string().url(),
-  title: z.string(),
-  status: z.number().int().min(400).max(599),
-  detail: z.string().optional(),
-  instance: z.string().optional(),
-  traceId: z.string().optional(),
-  errores: z.array(ErrorDetalleSchema).optional(),
-});
+export const CreditoIdSchema = z
+  .string()
+  .regex(/^C-\d{3,8}$/, 'Formato esperado: C-004')
+  .meta({
+    description: 'Identificador del crédito',
+    examples: ['C-004'],
+  });
 
-export const FechaISOSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato AAAA-MM-DD');
-export const CreditoIdSchema = z.string().regex(/^C-\d{3,8}$/, 'Formato C-004');
-export const IdempotencyKeySchema = z.string().uuid();
+export const IdempotencyKeySchema = z.string().uuid().meta({
+  description: 'Clave UUID utilizada para evitar registrar dos veces un pago',
+  examples: ['5b0b9e2e-6a1f-4a5c-9c1e-0d6d1a1f0b3a'],
+});

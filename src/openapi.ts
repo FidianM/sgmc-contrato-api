@@ -1,4 +1,52 @@
-﻿export const documentoOpenAPI = {
+﻿import { z } from 'zod';
+
+import {
+  DineroSchema,
+  ErrorDetalleSchema,
+  ProblemDetailsSchema,
+  FechaISOSchema,
+  InstanteISOSchema,
+  CreditoIdSchema,
+  IdempotencyKeySchema,
+} from './contratos/comunes.js';
+
+import {
+  MedioDePagoSchema,
+  RegistrarPagoRequestSchema,
+  AplicacionDelPagoSchema,
+  TramoMoraSchema,
+  EstadoCreditoSchema,
+  PagoRegistradoSchema,
+} from './contratos/pagos.js';
+
+import {
+  IncluirReestructuradosSchema,
+  CarteraEnRiesgoQuerySchema,
+  DetalleTramoCarteraSchema,
+  CarteraEnRiesgoResponseSchema,
+} from './contratos/cartera.js';
+
+function convertirAOpenAPI(
+  schema: z.ZodType,
+  io: 'input' | 'output' = 'output',
+) {
+  const jsonSchema = z.toJSONSchema(schema, {
+    target: 'draft-2020-12',
+    io,
+  });
+
+  const {
+    $schema: esquemaJSONEliminado,
+    ...esquemaOpenAPI
+  } = jsonSchema;
+
+  void esquemaJSONEliminado;
+
+  return esquemaOpenAPI;
+}
+
+
+export const documentoOpenAPI = {
   openapi: '3.1.0',
   info: {
     title: 'SGMC · API de Crédito Vecino, S. A.',
@@ -29,12 +77,10 @@
             in: 'path',
             required: true,
             description: 'Identificador del crédito',
-            schema: {
-              type: 'string',
-              pattern: '^C-\\d{3,8}$',
-              description: 'Identificador del crédito',
-              examples: ['C-004'],
-            },
+            schema: convertirAOpenAPI(
+              CreditoIdSchema,
+              'input',
+            ),
           },
           {
             name: 'Idempotency-Key',
@@ -42,13 +88,10 @@
             required: true,
             description:
               'Clave generada por el cliente. Si se reintenta el mismo pago con la misma clave y el mismo cuerpo, se devuelve la respuesta original (200) sin volver a cobrar.',
-            schema: {
-              type: 'string',
-              format: 'uuid',
-              pattern:
-                '^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$',
-              examples: ['5b0b9e2e-6a1f-4a5c-9c1e-0d6d1a1f0b3a'],
-            },
+            schema: convertirAOpenAPI(
+              IdempotencyKeySchema,
+              'input',
+            ),
           },
         ],
         requestBody: {
@@ -218,18 +261,19 @@
             name: 'fechaCorte',
             in: 'query',
             required: true,
-            schema: {
-              type: 'string',
-              pattern: '^\\d{4}-\\d{2}-\\d{2}$',
-              description: 'Fecha calendario en formato AAAA-MM-DD',
-              examples: ['2026-08-22'],
-            },
+            schema: convertirAOpenAPI(
+              FechaISOSchema,
+              'input',
+            ),
           },
           {
             name: 'incluirReestructurados',
             in: 'query',
             required: false,
-            schema: { type: 'string', enum: ['true', 'false'] },
+            schema: convertirAOpenAPI(
+              IncluirReestructuradosSchema,
+              'input',
+            ),
           },
         ],
         responses: {
@@ -305,131 +349,78 @@
       },
     },
   },
-  components: {
+    components: {
     schemas: {
-      Dinero: {
-        type: 'object',
-        properties: {
-          valor: {
-            type: 'string',
-            pattern: '^-?\\d{1,13}\\.\\d{2}$',
-            description: 'Importe como cadena decimal con 2 decimales exactos',
-            examples: ['1004.62'],
-          },
-          moneda: {
-            type: 'string',
-            const: 'GTQ',
-            description: 'Código ISO 4217. El Sistema opera únicamente en quetzales.',
-            examples: ['GTQ'],
-          },
-        },
-        required: ['valor', 'moneda'],
-        additionalProperties: false,
-        description: 'Objeto de Valor monetario en quetzales.',
-      },
-      ProblemDetails: {
-        type: 'object',
-        properties: {
-          type: { type: 'string', format: 'uri', examples: ['https://api.creditovecino.gt/problemas/clave-idempotencia-reutilizada'] },
-          title: { type: 'string', examples: ['Clave de idempotencia reutilizada con otro contenido'] },
-          status: { type: 'integer', minimum: 400, maximum: 599, examples: [409] },
-          detail: { type: 'string', examples: ['La clave 5b0b9e2e… se usó antes con un monto distinto.'] },
-          instance: { type: 'string', examples: ['/creditos/C-004/pagos'] },
-          traceId: { type: 'string', examples: ['01J9Z4T8Q2'] },
-          errores: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                campo: { type: 'string', examples: ['monto.valor'] },
-                mensaje: { type: 'string', examples: ['Debe ser decimal de punto fijo con 2 decimales'] },
-              },
-              required: ['campo', 'mensaje'],
-              additionalProperties: false,
-            },
-          },
-        },
-        required: ['type', 'title', 'status'],
-        additionalProperties: false,
-        description: 'Cuerpo de error uniforme del Sistema, conforme a RFC 9457.',
-      },
-      Paginacion: {
-        type: 'object',
-        properties: {
-          limite: { default: 50, type: 'integer', minimum: 1, maximum: 200 },
-          cursor: { type: 'string' },
-        },
-        required: ['limite'],
-        additionalProperties: false,
-      },
-      CarteraEnRiesgoQuery: {
-        type: 'object',
-        properties: {
-          fechaCorte: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', examples: ['2026-08-22'] },
-        },
-        required: ['fechaCorte'],
-        additionalProperties: false,
-      },
-      CarteraEnRiesgoResponse: {
-        type: 'object',
-        properties: {
-          fechaCorte: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', examples: ['2026-08-22'] },
-          carteraActiva: { $ref: '#/components/schemas/Dinero' },
-          saldoEnRiesgo: { $ref: '#/components/schemas/Dinero' },
-          porcentajeEnRiesgo: { type: 'number', minimum: 0, maximum: 1, examples: [0.07] },
-          dadoPorIncobrableEnElPeriodo: { $ref: '#/components/schemas/Dinero' },
-        },
-        required: ['fechaCorte', 'carteraActiva', 'saldoEnRiesgo', 'porcentajeEnRiesgo', 'dadoPorIncobrableEnElPeriodo'],
-        additionalProperties: false,
-      },
-      MedioDePago: {
-        type: 'string',
-        enum: ['efectivo', 'transferencia', 'agente_bancario', 'boleta_banco'],
-      },
-      RegistrarPagoRequest: {
-        type: 'object',
-        properties: {
-          monto: { $ref: '#/components/schemas/Dinero' },
-          fechaPago: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', examples: ['2026-08-22'] },
-          medio: { $ref: '#/components/schemas/MedioDePago' },
-          referencia: { type: 'string', examples: ['BOL-88213'] },
-        },
-        required: ['monto', 'fechaPago', 'medio'],
-        additionalProperties: false,
-      },
-      AplicacionDelPago: {
-        type: 'object',
-        properties: {
-          gastos: { $ref: '#/components/schemas/Dinero' },
-          interesMoratorio: { $ref: '#/components/schemas/Dinero' },
-          interesCorriente: { $ref: '#/components/schemas/Dinero' },
-          capital: { $ref: '#/components/schemas/Dinero' },
-          excedente: { $ref: '#/components/schemas/Dinero' },
-        },
-        required: ['gastos', 'interesMoratorio', 'interesCorriente', 'capital', 'excedente'],
-        additionalProperties: false,
-      },
-      EstadoCredito: {
-        type: 'string',
-        enum: ['vigente', 'en_mora', 'cancelado', 'reestructurado', 'incobrable'],
-      },
-      TramoMora: {
-        type: 'string',
-        enum: ['al_dia', 'mora_1', 'mora_2', 'mora_3', 'vencido', 'ninguno'],
-      },
-      PagoRegistrado: {
-        type: 'object',
-        properties: {
-          pagoId: { type: 'string', examples: ['PG-2026-000731'] },
-          creditoId: { type: 'string', pattern: '^C-\\d{3,8}$', examples: ['C-004'] },
-          recibidoEn: { type: 'string', examples: ['2026-08-22T09:15:00-06:00'] },
-          montoRecibido: { $ref: '#/components/schemas/Dinero' },
-          aplicacion: { $ref: '#/components/schemas/AplicacionDelPago' },
-          reproducido: { type: 'boolean', examples: [false] },
-        },
-        required: ['pagoId', 'creditoId', 'recibidoEn', 'montoRecibido', 'aplicacion', 'reproducido'],
-        additionalProperties: false,
-      },
+      Dinero: convertirAOpenAPI(
+        DineroSchema,
+      ),
+
+      ErrorDetalle: convertirAOpenAPI(
+        ErrorDetalleSchema,
+      ),
+
+      ProblemDetails: convertirAOpenAPI(
+        ProblemDetailsSchema,
+      ),
+
+      FechaISO: convertirAOpenAPI(
+        FechaISOSchema,
+      ),
+
+      InstanteISO: convertirAOpenAPI(
+        InstanteISOSchema,
+      ),
+
+      CreditoId: convertirAOpenAPI(
+        CreditoIdSchema,
+      ),
+
+      IdempotencyKey: convertirAOpenAPI(
+        IdempotencyKeySchema,
+      ),
+
+      MedioDePago: convertirAOpenAPI(
+        MedioDePagoSchema,
+      ),
+
+      RegistrarPagoRequest: convertirAOpenAPI(
+        RegistrarPagoRequestSchema,
+        'input',
+      ),
+
+      AplicacionDelPago: convertirAOpenAPI(
+        AplicacionDelPagoSchema,
+      ),
+
+      TramoMora: convertirAOpenAPI(
+        TramoMoraSchema,
+      ),
+
+      EstadoCredito: convertirAOpenAPI(
+        EstadoCreditoSchema,
+      ),
+
+      PagoRegistrado: convertirAOpenAPI(
+        PagoRegistradoSchema,
+      ),
+
+      IncluirReestructurados: convertirAOpenAPI(
+        IncluirReestructuradosSchema,
+        'input',
+      ),
+
+      CarteraEnRiesgoQuery: convertirAOpenAPI(
+        CarteraEnRiesgoQuerySchema,
+        'input',
+      ),
+
+      DetalleTramoCartera: convertirAOpenAPI(
+        DetalleTramoCarteraSchema,
+      ),
+
+      CarteraEnRiesgoResponse: convertirAOpenAPI(
+        CarteraEnRiesgoResponseSchema,
+      ),
     },
   },
 };
