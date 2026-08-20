@@ -60,6 +60,7 @@
               "type": "string",
               "format": "uuid",
               "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Clave UUID utilizada para evitar registrar dos veces un pago",
               "examples": [
                 "5b0b9e2e-6a1f-4a5c-9c1e-0d6d1a1f0b3a"
               ]
@@ -263,7 +264,8 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
               "description": "Fecha calendario en formato AAAA-MM-DD",
               "examples": [
                 "2026-08-22"
@@ -275,11 +277,9 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "string",
-              "enum": [
-                "true",
-                "false"
-              ]
+              "default": false,
+              "description": "Indica si los créditos reestructurados se incluyen en el cálculo",
+              "type": "boolean"
             }
           }
         ],
@@ -404,19 +404,11 @@
         "properties": {
           "valor": {
             "type": "string",
-            "pattern": "^-?\\d{1,13}\\.\\d{2}$",
-            "description": "Importe como cadena decimal con 2 decimales exactos",
-            "examples": [
-              "1004.62"
-            ]
+            "pattern": "^-?\\d{1,13}\\.\\d{2}$"
           },
           "moneda": {
             "type": "string",
-            "const": "GTQ",
-            "description": "Código ISO 4217. El Sistema opera únicamente en quetzales.",
-            "examples": [
-              "GTQ"
-            ]
+            "const": "GTQ"
           }
         },
         "required": [
@@ -424,49 +416,47 @@
           "moneda"
         ],
         "additionalProperties": false,
-        "description": "Objeto de Valor monetario en quetzales."
+        "description": "Objeto monetario expresado en quetzales"
+      },
+      "ErrorDetalle": {
+        "type": "object",
+        "properties": {
+          "campo": {
+            "type": "string"
+          },
+          "mensaje": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "campo",
+          "mensaje"
+        ],
+        "additionalProperties": false
       },
       "ProblemDetails": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "format": "uri",
-            "examples": [
-              "https://api.creditovecino.gt/problemas/clave-idempotencia-reutilizada"
-            ]
+            "format": "uri"
           },
           "title": {
-            "type": "string",
-            "examples": [
-              "Clave de idempotencia reutilizada con otro contenido"
-            ]
+            "type": "string"
           },
           "status": {
             "type": "integer",
             "minimum": 400,
-            "maximum": 599,
-            "examples": [
-              409
-            ]
+            "maximum": 599
           },
           "detail": {
-            "type": "string",
-            "examples": [
-              "La clave 5b0b9e2e… se usó antes con un monto distinto."
-            ]
+            "type": "string"
           },
           "instance": {
-            "type": "string",
-            "examples": [
-              "/creditos/C-004/pagos"
-            ]
+            "type": "string"
           },
           "traceId": {
-            "type": "string",
-            "examples": [
-              "01J9Z4T8Q2"
-            ]
+            "type": "string"
           },
           "errores": {
             "type": "array",
@@ -474,16 +464,10 @@
               "type": "object",
               "properties": {
                 "campo": {
-                  "type": "string",
-                  "examples": [
-                    "monto.valor"
-                  ]
+                  "type": "string"
                 },
                 "mensaje": {
-                  "type": "string",
-                  "examples": [
-                    "Debe ser decimal de punto fijo con 2 decimales"
-                  ]
+                  "type": "string"
                 }
               },
               "required": [
@@ -500,78 +484,42 @@
           "status"
         ],
         "additionalProperties": false,
-        "description": "Cuerpo de error uniforme del Sistema, conforme a RFC 9457."
+        "description": "Cuerpo uniforme para las respuestas de error"
       },
-      "Paginacion": {
-        "type": "object",
-        "properties": {
-          "limite": {
-            "default": 50,
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 200
-          },
-          "cursor": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "limite"
-        ],
-        "additionalProperties": false
+      "FechaISO": {
+        "type": "string",
+        "format": "date",
+        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+        "description": "Fecha calendario en formato AAAA-MM-DD",
+        "examples": [
+          "2026-08-22"
+        ]
       },
-      "CarteraEnRiesgoQuery": {
-        "type": "object",
-        "properties": {
-          "fechaCorte": {
-            "type": "string",
-            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-            "examples": [
-              "2026-08-22"
-            ]
-          }
-        },
-        "required": [
-          "fechaCorte"
-        ],
-        "additionalProperties": false
+      "InstanteISO": {
+        "type": "string",
+        "format": "date-time",
+        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+        "description": "Fecha y hora ISO 8601 con zona horaria",
+        "examples": [
+          "2026-08-22T09:15:00-06:00"
+        ]
       },
-      "CarteraEnRiesgoResponse": {
-        "type": "object",
-        "properties": {
-          "fechaCorte": {
-            "type": "string",
-            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-            "examples": [
-              "2026-08-22"
-            ]
-          },
-          "carteraActiva": {
-            "$ref": "#/components/schemas/Dinero"
-          },
-          "saldoEnRiesgo": {
-            "$ref": "#/components/schemas/Dinero"
-          },
-          "porcentajeEnRiesgo": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1,
-            "examples": [
-              0.07
-            ]
-          },
-          "dadoPorIncobrableEnElPeriodo": {
-            "$ref": "#/components/schemas/Dinero"
-          }
-        },
-        "required": [
-          "fechaCorte",
-          "carteraActiva",
-          "saldoEnRiesgo",
-          "porcentajeEnRiesgo",
-          "dadoPorIncobrableEnElPeriodo"
-        ],
-        "additionalProperties": false
+      "CreditoId": {
+        "type": "string",
+        "pattern": "^C-\\d{3,8}$",
+        "description": "Identificador del crédito",
+        "examples": [
+          "C-004"
+        ]
+      },
+      "IdempotencyKey": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "description": "Clave UUID utilizada para evitar registrar dos veces un pago",
+        "examples": [
+          "5b0b9e2e-6a1f-4a5c-9c1e-0d6d1a1f0b3a"
+        ]
       },
       "MedioDePago": {
         "type": "string",
@@ -580,29 +528,57 @@
           "transferencia",
           "agente_bancario",
           "boleta_banco"
-        ]
+        ],
+        "description": "Canal por el cual se recibió el pago"
       },
       "RegistrarPagoRequest": {
         "type": "object",
         "properties": {
           "monto": {
-            "$ref": "#/components/schemas/Dinero"
+            "type": "object",
+            "properties": {
+              "valor": {
+                "type": "string",
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+              },
+              "moneda": {
+                "type": "string",
+                "const": "GTQ"
+              }
+            },
+            "required": [
+              "valor",
+              "moneda"
+            ],
+            "additionalProperties": false,
+            "description": "Objeto monetario expresado en quetzales"
           },
           "fechaPago": {
             "type": "string",
-            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Fecha calendario en formato AAAA-MM-DD",
             "examples": [
               "2026-08-22"
             ]
           },
           "medio": {
-            "$ref": "#/components/schemas/MedioDePago"
+            "type": "string",
+            "enum": [
+              "efectivo",
+              "transferencia",
+              "agente_bancario",
+              "boleta_banco"
+            ],
+            "description": "Canal por el cual se recibió el pago"
           },
           "referencia": {
-            "type": "string",
+            "description": "Referencia o comprobante externo del pago",
             "examples": [
               "BOL-88213"
-            ]
+            ],
+            "type": "string",
+            "maxLength": 40
           }
         },
         "required": [
@@ -610,25 +586,106 @@
           "fechaPago",
           "medio"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Información enviada para registrar un pago"
       },
       "AplicacionDelPago": {
         "type": "object",
         "properties": {
           "gastos": {
-            "$ref": "#/components/schemas/Dinero"
+            "type": "object",
+            "properties": {
+              "valor": {
+                "type": "string",
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+              },
+              "moneda": {
+                "type": "string",
+                "const": "GTQ"
+              }
+            },
+            "required": [
+              "valor",
+              "moneda"
+            ],
+            "additionalProperties": false,
+            "description": "Objeto monetario expresado en quetzales"
           },
           "interesMoratorio": {
-            "$ref": "#/components/schemas/Dinero"
+            "type": "object",
+            "properties": {
+              "valor": {
+                "type": "string",
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+              },
+              "moneda": {
+                "type": "string",
+                "const": "GTQ"
+              }
+            },
+            "required": [
+              "valor",
+              "moneda"
+            ],
+            "additionalProperties": false,
+            "description": "Objeto monetario expresado en quetzales"
           },
           "interesCorriente": {
-            "$ref": "#/components/schemas/Dinero"
+            "type": "object",
+            "properties": {
+              "valor": {
+                "type": "string",
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+              },
+              "moneda": {
+                "type": "string",
+                "const": "GTQ"
+              }
+            },
+            "required": [
+              "valor",
+              "moneda"
+            ],
+            "additionalProperties": false,
+            "description": "Objeto monetario expresado en quetzales"
           },
           "capital": {
-            "$ref": "#/components/schemas/Dinero"
+            "type": "object",
+            "properties": {
+              "valor": {
+                "type": "string",
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+              },
+              "moneda": {
+                "type": "string",
+                "const": "GTQ"
+              }
+            },
+            "required": [
+              "valor",
+              "moneda"
+            ],
+            "additionalProperties": false,
+            "description": "Objeto monetario expresado en quetzales"
           },
           "excedente": {
-            "$ref": "#/components/schemas/Dinero"
+            "type": "object",
+            "properties": {
+              "valor": {
+                "type": "string",
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+              },
+              "moneda": {
+                "type": "string",
+                "const": "GTQ"
+              }
+            },
+            "required": [
+              "valor",
+              "moneda"
+            ],
+            "additionalProperties": false,
+            "description": "Objeto monetario expresado en quetzales"
           }
         },
         "required": [
@@ -638,7 +695,19 @@
           "capital",
           "excedente"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Desglose según la prelación: gastos, interés moratorio, interés corriente, capital y excedente"
+      },
+      "TramoMora": {
+        "type": "string",
+        "enum": [
+          "ninguno",
+          "mora_1",
+          "mora_2",
+          "mora_3",
+          "vencido"
+        ],
+        "description": "Clasificación calculada a partir de los días de atraso"
       },
       "EstadoCredito": {
         "type": "string",
@@ -648,18 +717,8 @@
           "cancelado",
           "reestructurado",
           "incobrable"
-        ]
-      },
-      "TramoMora": {
-        "type": "string",
-        "enum": [
-          "al_dia",
-          "mora_1",
-          "mora_2",
-          "mora_3",
-          "vencido",
-          "ninguno"
-        ]
+        ],
+        "description": "Estado actual del crédito"
       },
       "PagoRegistrado": {
         "type": "object",
@@ -673,24 +732,201 @@
           "creditoId": {
             "type": "string",
             "pattern": "^C-\\d{3,8}$",
+            "description": "Identificador del crédito",
             "examples": [
               "C-004"
             ]
           },
           "recibidoEn": {
             "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+            "description": "Fecha y hora ISO 8601 con zona horaria",
             "examples": [
               "2026-08-22T09:15:00-06:00"
             ]
           },
           "montoRecibido": {
-            "$ref": "#/components/schemas/Dinero"
+            "type": "object",
+            "properties": {
+              "valor": {
+                "type": "string",
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+              },
+              "moneda": {
+                "type": "string",
+                "const": "GTQ"
+              }
+            },
+            "required": [
+              "valor",
+              "moneda"
+            ],
+            "additionalProperties": false,
+            "description": "Objeto monetario expresado en quetzales"
           },
           "aplicacion": {
-            "$ref": "#/components/schemas/AplicacionDelPago"
+            "type": "object",
+            "properties": {
+              "gastos": {
+                "type": "object",
+                "properties": {
+                  "valor": {
+                    "type": "string",
+                    "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                  },
+                  "moneda": {
+                    "type": "string",
+                    "const": "GTQ"
+                  }
+                },
+                "required": [
+                  "valor",
+                  "moneda"
+                ],
+                "additionalProperties": false,
+                "description": "Objeto monetario expresado en quetzales"
+              },
+              "interesMoratorio": {
+                "type": "object",
+                "properties": {
+                  "valor": {
+                    "type": "string",
+                    "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                  },
+                  "moneda": {
+                    "type": "string",
+                    "const": "GTQ"
+                  }
+                },
+                "required": [
+                  "valor",
+                  "moneda"
+                ],
+                "additionalProperties": false,
+                "description": "Objeto monetario expresado en quetzales"
+              },
+              "interesCorriente": {
+                "type": "object",
+                "properties": {
+                  "valor": {
+                    "type": "string",
+                    "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                  },
+                  "moneda": {
+                    "type": "string",
+                    "const": "GTQ"
+                  }
+                },
+                "required": [
+                  "valor",
+                  "moneda"
+                ],
+                "additionalProperties": false,
+                "description": "Objeto monetario expresado en quetzales"
+              },
+              "capital": {
+                "type": "object",
+                "properties": {
+                  "valor": {
+                    "type": "string",
+                    "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                  },
+                  "moneda": {
+                    "type": "string",
+                    "const": "GTQ"
+                  }
+                },
+                "required": [
+                  "valor",
+                  "moneda"
+                ],
+                "additionalProperties": false,
+                "description": "Objeto monetario expresado en quetzales"
+              },
+              "excedente": {
+                "type": "object",
+                "properties": {
+                  "valor": {
+                    "type": "string",
+                    "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                  },
+                  "moneda": {
+                    "type": "string",
+                    "const": "GTQ"
+                  }
+                },
+                "required": [
+                  "valor",
+                  "moneda"
+                ],
+                "additionalProperties": false,
+                "description": "Objeto monetario expresado en quetzales"
+              }
+            },
+            "required": [
+              "gastos",
+              "interesMoratorio",
+              "interesCorriente",
+              "capital",
+              "excedente"
+            ],
+            "additionalProperties": false,
+            "description": "Desglose según la prelación: gastos, interés moratorio, interés corriente, capital y excedente"
+          },
+          "saldoCapitalDespues": {
+            "type": "object",
+            "properties": {
+              "valor": {
+                "type": "string",
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+              },
+              "moneda": {
+                "type": "string",
+                "const": "GTQ"
+              }
+            },
+            "required": [
+              "valor",
+              "moneda"
+            ],
+            "additionalProperties": false,
+            "description": "Objeto monetario expresado en quetzales"
+          },
+          "estadoCredito": {
+            "type": "string",
+            "enum": [
+              "vigente",
+              "en_mora",
+              "cancelado",
+              "reestructurado",
+              "incobrable"
+            ],
+            "description": "Estado actual del crédito"
+          },
+          "tramoMora": {
+            "type": "string",
+            "enum": [
+              "ninguno",
+              "mora_1",
+              "mora_2",
+              "mora_3",
+              "vencido"
+            ],
+            "description": "Clasificación calculada a partir de los días de atraso"
+          },
+          "diasAtraso": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Cantidad de días de atraso después de aplicar el pago",
+            "examples": [
+              32
+            ]
           },
           "reproducido": {
             "type": "boolean",
+            "description": "Indica si se devolvió la respuesta de un pago registrado anteriormente",
             "examples": [
               false
             ]
@@ -702,9 +938,230 @@
           "recibidoEn",
           "montoRecibido",
           "aplicacion",
+          "saldoCapitalDespues",
+          "estadoCredito",
+          "tramoMora",
+          "diasAtraso",
           "reproducido"
         ],
+        "additionalProperties": false,
+        "description": "Resultado obtenido después de registrar y aplicar un pago"
+      },
+      "IncluirReestructurados": {
+        "default": false,
+        "description": "Indica si los créditos reestructurados se incluyen en el cálculo",
+        "type": "boolean"
+      },
+      "CarteraEnRiesgoQuery": {
+        "type": "object",
+        "properties": {
+          "fechaCorte": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Fecha calendario en formato AAAA-MM-DD",
+            "examples": [
+              "2026-08-22"
+            ]
+          },
+          "incluirReestructurados": {
+            "default": false,
+            "description": "Indica si los créditos reestructurados se incluyen en el cálculo",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "fechaCorte"
+        ],
+        "additionalProperties": false,
+        "description": "Parámetros para calcular la cartera en riesgo"
+      },
+      "DetalleTramoCartera": {
+        "type": "object",
+        "properties": {
+          "tramo": {
+            "type": "string",
+            "enum": [
+              "ninguno",
+              "mora_1",
+              "mora_2",
+              "mora_3",
+              "vencido"
+            ],
+            "description": "Clasificación calculada a partir de los días de atraso"
+          },
+          "creditos": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Cantidad de créditos clasificados en el tramo"
+          },
+          "saldoCapital": {
+            "type": "object",
+            "properties": {
+              "valor": {
+                "type": "string",
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+              },
+              "moneda": {
+                "type": "string",
+                "const": "GTQ"
+              }
+            },
+            "required": [
+              "valor",
+              "moneda"
+            ],
+            "additionalProperties": false,
+            "description": "Objeto monetario expresado en quetzales"
+          }
+        },
+        "required": [
+          "tramo",
+          "creditos",
+          "saldoCapital"
+        ],
         "additionalProperties": false
+      },
+      "CarteraEnRiesgoResponse": {
+        "type": "object",
+        "properties": {
+          "fechaCorte": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "Fecha calendario en formato AAAA-MM-DD",
+            "examples": [
+              "2026-08-22"
+            ]
+          },
+          "carteraActiva": {
+            "type": "object",
+            "properties": {
+              "valor": {
+                "type": "string",
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+              },
+              "moneda": {
+                "type": "string",
+                "const": "GTQ"
+              }
+            },
+            "required": [
+              "valor",
+              "moneda"
+            ],
+            "additionalProperties": false,
+            "description": "Objeto monetario expresado en quetzales"
+          },
+          "saldoEnRiesgo": {
+            "type": "object",
+            "properties": {
+              "valor": {
+                "type": "string",
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+              },
+              "moneda": {
+                "type": "string",
+                "const": "GTQ"
+              }
+            },
+            "required": [
+              "valor",
+              "moneda"
+            ],
+            "additionalProperties": false,
+            "description": "Objeto monetario expresado en quetzales"
+          },
+          "porcentajeEnRiesgo": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Proporción de la cartera activa que se encuentra en riesgo",
+            "examples": [
+              0.07
+            ]
+          },
+          "dadoPorIncobrableEnElPeriodo": {
+            "type": "object",
+            "properties": {
+              "valor": {
+                "type": "string",
+                "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+              },
+              "moneda": {
+                "type": "string",
+                "const": "GTQ"
+              }
+            },
+            "required": [
+              "valor",
+              "moneda"
+            ],
+            "additionalProperties": false,
+            "description": "Objeto monetario expresado en quetzales"
+          },
+          "porTramo": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tramo": {
+                  "type": "string",
+                  "enum": [
+                    "ninguno",
+                    "mora_1",
+                    "mora_2",
+                    "mora_3",
+                    "vencido"
+                  ],
+                  "description": "Clasificación calculada a partir de los días de atraso"
+                },
+                "creditos": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991,
+                  "description": "Cantidad de créditos clasificados en el tramo"
+                },
+                "saldoCapital": {
+                  "type": "object",
+                  "properties": {
+                    "valor": {
+                      "type": "string",
+                      "pattern": "^-?\\d{1,13}\\.\\d{2}$"
+                    },
+                    "moneda": {
+                      "type": "string",
+                      "const": "GTQ"
+                    }
+                  },
+                  "required": [
+                    "valor",
+                    "moneda"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Objeto monetario expresado en quetzales"
+                }
+              },
+              "required": [
+                "tramo",
+                "creditos",
+                "saldoCapital"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "fechaCorte",
+          "carteraActiva",
+          "saldoEnRiesgo",
+          "porcentajeEnRiesgo",
+          "dadoPorIncobrableEnElPeriodo",
+          "porTramo"
+        ],
+        "additionalProperties": false,
+        "description": "Resultado del cálculo de cartera en riesgo"
       }
     }
   }
