@@ -1,7 +1,8 @@
 ﻿import { readFileSync } from 'node:fs';
 import { parse } from 'yaml';
-// @ts-ignore
-import { validate } from '@seriousme/openapi-schema-validator';
+import * as validatorPkg from '@seriousme/openapi-schema-validator';
+
+const validate = (validatorPkg as any).validate || (validatorPkg as any).default?.validate || (validatorPkg as any).default || validatorPkg;
 
 async function main() {
   const yamlContent = readFileSync('openapi.yaml', 'utf-8');
