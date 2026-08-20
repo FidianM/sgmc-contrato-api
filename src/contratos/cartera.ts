@@ -1,16 +1,13 @@
 ﻿import { z } from 'zod';
-import {
-  DineroSchema,
-  FechaISOSchema,
-} from './comunes.js';
+import { DineroSchema, FechaISOSchema } from './comunes.js';
 import { TramoMoraSchema } from './pagos.js';
 
 export const IncluirReestructuradosSchema = z
-  .boolean()
-  .default(false)
+  .literal(true)
+  .default(true)
   .meta({
     description:
-      'Indica si los créditos reestructurados se incluyen en el cálculo',
+      'El indicador oficial siempre incluye los créditos reestructurados, aunque estén al día',
   });
 
 export const CarteraEnRiesgoQuerySchema = z
@@ -35,6 +32,21 @@ export const DetalleTramoCarteraSchema = z
   })
   .strict();
 
+export const ReestructuradosAlDiaSchema = z
+  .object({
+    creditos: z.number().int().nonnegative().meta({
+      description:
+        'Cantidad de créditos reestructurados que se encuentran al día',
+    }),
+
+    saldoCapital: DineroSchema,
+  })
+  .strict()
+  .meta({
+    description:
+      'Créditos que cuentan como cartera en riesgo por estar reestructurados, aunque no tengan atraso',
+  });
+
 export const CarteraEnRiesgoResponseSchema = z
   .object({
     fechaCorte: FechaISOSchema,
@@ -52,8 +64,11 @@ export const CarteraEnRiesgoResponseSchema = z
     dadoPorIncobrableEnElPeriodo: DineroSchema,
 
     porTramo: z.array(DetalleTramoCarteraSchema),
+
+    reestructuradosAlDia: ReestructuradosAlDiaSchema,
   })
   .strict()
   .meta({
-    description: 'Resultado del cálculo de cartera en riesgo',
+    description:
+      'Resultado del cálculo de cartera en riesgo. El saldo en riesgo incluye los tramos con más de 30 días y los créditos reestructurados.',
   });

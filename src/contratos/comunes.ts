@@ -1,25 +1,52 @@
 ﻿import { z } from 'zod';
 
+export const ValorMonetarioSchema = z
+  .string()
+  .regex(
+    /^\d{1,13}\.\d{2}$/,
+    'Debe ser una cadena decimal no negativa con 2 decimales exactos',
+  )
+  .meta({
+    description: 'Importe no negativo con exactamente dos decimales',
+    examples: ['1004.62'],
+  });
+
+export const ValorMonetarioPositivoSchema = ValorMonetarioSchema.refine(
+  (valor) => BigInt(valor.replace('.', '')) > 0n,
+  'El monto debe ser mayor que cero',
+).meta({
+  description: 'Importe mayor que cero con exactamente dos decimales',
+  examples: ['1011.88'],
+});
+
 export const DineroSchema = z
   .object({
-    valor: z
-      .string()
-      .regex(
-        /^-?\d{1,13}\.\d{2}$/,
-        'Debe ser una cadena decimal con 2 decimales exactos',
-      )
-      .meta({
-        description: 'Importe con exactamente dos decimales',
-        examples: ['1004.62'],
-      }),
+    valor: ValorMonetarioSchema,
     moneda: z.literal('GTQ'),
   })
   .strict()
   .meta({
-    description: 'Objeto monetario expresado en quetzales',
+    description:
+      'Objeto monetario no negativo expresado en quetzales. El valor viaja como texto para evitar errores de punto flotante.',
     examples: [
       {
         valor: '1004.62',
+        moneda: 'GTQ',
+      },
+    ],
+  });
+
+export const DineroPositivoSchema = z
+  .object({
+    valor: ValorMonetarioPositivoSchema,
+    moneda: z.literal('GTQ'),
+  })
+  .strict()
+  .meta({
+    description: 'Objeto monetario expresado en quetzales y mayor que cero',
+    examples: [
+      {
+        valor: '1011.88',
         moneda: 'GTQ',
       },
     ],
@@ -52,12 +79,10 @@ export const FechaISOSchema = z.iso.date().meta({
   examples: ['2026-08-22'],
 });
 
-export const InstanteISOSchema = z.iso
-  .datetime({ offset: true })
-  .meta({
-    description: 'Fecha y hora ISO 8601 con zona horaria',
-    examples: ['2026-08-22T09:15:00-06:00'],
-  });
+export const InstanteISOSchema = z.iso.datetime({ offset: true }).meta({
+  description: 'Fecha y hora ISO 8601 con zona horaria',
+  examples: ['2026-08-22T09:15:00-06:00'],
+});
 
 export const CreditoIdSchema = z
   .string()

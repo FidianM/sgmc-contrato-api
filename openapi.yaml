@@ -24,10 +24,9 @@ paths:
         - Cartera y cobros
       operationId: registrarPago
       summary: Registra un pago sobre un crédito
-      description: "Aplica el pago en el orden de prelación (gastos → interés
-        moratorio → interés corriente → capital) y devuelve el desglose.
-        Operación NO idempotente por método: la idempotencia se obtiene con la
-        cabecera Idempotency-Key."
+      description: Aplica el pago en el orden de prelación (gastos → interés moratorio
+        → interés corriente → capital) y devuelve el desglose. La idempotencia
+        se obtiene con la cabecera Idempotency-Key.
       parameters:
         - name: creditoId
           in: path
@@ -43,8 +42,8 @@ paths:
           in: header
           required: true
           description: Clave generada por el cliente. Si se reintenta el mismo pago con la
-            misma clave y el mismo cuerpo, se devuelve la respuesta original
-            (200) sin volver a cobrar.
+            misma clave y el mismo cuerpo, se devuelve la respuesta original sin
+            volver a cobrar.
           schema:
             type: string
             format: uuid
@@ -60,7 +59,7 @@ paths:
               $ref: "#/components/schemas/RegistrarPagoRequest"
             examples:
               pagoExacto:
-                summary: Pago exacto de la cuota 2 vencida (caso de referencia 6.6.3)
+                summary: Pago exacto de la cuota 2 vencida
                 value:
                   monto:
                     valor: "1011.88"
@@ -69,7 +68,7 @@ paths:
                   medio: agente_bancario
                   referencia: BOL-88213
               pagoParcial:
-                summary: Pago de menos (caso de referencia 6.6.4)
+                summary: Pago de menos
                 value:
                   monto:
                     valor: "500.00"
@@ -78,12 +77,46 @@ paths:
                   medio: efectivo
       responses:
         "200":
-          description: "Reintento con la misma clave y el mismo contenido: se reproduce la
-            respuesta original (reproducido = true). No se cobró de nuevo."
+          description: Se reproduce la respuesta original de un pago registrado
+            anteriormente. No se cobra de nuevo.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PagoRegistrado"
+              examples:
+                pagoReproducido:
+                  summary: Respuesta original reproducida sin cobrar de nuevo
+                  value:
+                    pagoId: PG-2026-000731
+                    creditoId: C-004
+                    recibidoEn: 2026-08-22T09:15:00-06:00
+                    montoRecibido: &a1
+                      valor: "1011.88"
+                      moneda: GTQ
+                    aplicacion: &a2
+                      gastos:
+                        valor: "0.00"
+                        moneda: GTQ
+                      interesMoratorio:
+                        valor: "7.26"
+                        moneda: GTQ
+                      interesCorriente:
+                        valor: "278.86"
+                        moneda: GTQ
+                      capital:
+                        valor: "725.76"
+                        moneda: GTQ
+                      excedente:
+                        valor: "0.00"
+                        moneda: GTQ
+                    destinoExcedente: null
+                    saldoCapitalDespues: &a3
+                      valor: "8569.62"
+                      moneda: GTQ
+                    estadoCredito: vigente
+                    tramoMora: ninguno
+                    diasAtraso: 0
+                    reproducido: true
         "201":
           description: Pago registrado por primera vez
           headers:
@@ -95,6 +128,21 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PagoRegistrado"
+              examples:
+                pagoNuevo:
+                  summary: Pago exacto registrado por primera vez
+                  value:
+                    pagoId: PG-2026-000731
+                    creditoId: C-004
+                    recibidoEn: 2026-08-22T09:15:00-06:00
+                    montoRecibido: *a1
+                    aplicacion: *a2
+                    destinoExcedente: null
+                    saldoCapitalDespues: *a3
+                    estadoCredito: vigente
+                    tramoMora: ninguno
+                    diasAtraso: 0
+                    reproducido: false
         "404":
           description: El crédito no existe
           content:
@@ -112,16 +160,14 @@ paths:
                     instance: /creditos/C-999/pagos
                     traceId: 01J9Z4T900
         "409":
-          description: "Conflicto: la clave de idempotencia se reutilizó con un contenido
-            distinto, o el estado del crédito no admite pagos (p. ej.
-            solicitado)."
+          description: La clave de idempotencia fue reutilizada con un contenido diferente.
           content:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/ProblemDetails"
               examples:
                 caso:
-                  summary: "Conflicto: clave reutilizada"
+                  summary: Conflicto por clave reutilizada
                   value:
                     type: https://api.creditovecino.gt/problemas/clave-idempotencia-reutilizada
                     title: Clave de idempotencia reutilizada con otro contenido
@@ -130,15 +176,14 @@ paths:
                     instance: /creditos/C-004/pagos
                     traceId: 01J9Z4T8Q2
         "422":
-          description: El cuerpo es sintácticamente válido pero viola una regla del
-            contrato o del dominio
+          description: El crédito existe, pero su estado actual no permite registrar pagos.
           content:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/ProblemDetails"
               examples:
                 caso:
-                  summary: Estado no admite pagos
+                  summary: El estado no admite pagos
                   value:
                     type: https://api.creditovecino.gt/problemas/estado-no-admite-pago
                     title: El crédito no admite pagos en su estado actual
@@ -149,6 +194,13 @@ paths:
                     traceId: 01J9Z4T9K1
         "429":
           description: Demasiadas solicitudes
+          headers:
+            Retry-After:
+              description: Segundos que deben esperarse antes de realizar otro intento
+              schema:
+                type: integer
+                minimum: 1
+                example: 60
           content:
             application/problem+json:
               schema:
@@ -186,8 +238,9 @@ paths:
         - Cierres e indicadores
       operationId: consultarCarteraEnRiesgo
       summary: Consulta el indicador de cartera en riesgo a una fecha de corte
-      description: Operación segura e idempotente. Devuelve siempre, junto al
-        porcentaje, lo dado por incobrable en el período.
+      description: Operación segura e idempotente. El indicador oficial incluye
+        siempre los créditos reestructurados y devuelve, junto al porcentaje, lo
+        dado por incobrable en el período.
       parameters:
         - name: fechaCorte
           in: query
@@ -202,10 +255,14 @@ paths:
         - name: incluirReestructurados
           in: query
           required: false
+          description: El valor permitido es true. Si no se envía, se utiliza true
+            automáticamente.
           schema:
-            default: false
-            description: Indica si los créditos reestructurados se incluyen en el cálculo
+            default: true
+            description: El indicador oficial siempre incluye los créditos reestructurados,
+              aunque estén al día
             type: boolean
+            const: true
       responses:
         "200":
           description: Indicador calculado
@@ -215,7 +272,7 @@ paths:
                 $ref: "#/components/schemas/CarteraEnRiesgoResponse"
               examples:
                 casoDeReferencia:
-                  summary: Caso de referencia 6.8.1 del Proyecto 1 (7.00 %)
+                  summary: Caso de referencia con 7.00 % de cartera en riesgo
                   value:
                     fechaCorte: 2026-08-22
                     carteraActiva:
@@ -244,6 +301,41 @@ paths:
                         saldoCapital:
                           valor: "8000.00"
                           moneda: GTQ
+                    reestructuradosAlDia:
+                      creditos: 1
+                      saldoCapital:
+                        valor: "6000.00"
+                        moneda: GTQ
+                despuesDeIncobrable:
+                  summary: Caso después de dar por incobrable C-005
+                  value:
+                    fechaCorte: 2026-08-31
+                    carteraActiva:
+                      valor: "792000.00"
+                      moneda: GTQ
+                    saldoEnRiesgo:
+                      valor: "48000.00"
+                      moneda: GTQ
+                    porcentajeEnRiesgo: 0.0606
+                    dadoPorIncobrableEnElPeriodo:
+                      valor: "8000.00"
+                      moneda: GTQ
+                    porTramo:
+                      - tramo: mora_2
+                        creditos: 1
+                        saldoCapital:
+                          valor: "24000.00"
+                          moneda: GTQ
+                      - tramo: mora_3
+                        creditos: 1
+                        saldoCapital:
+                          valor: "18000.00"
+                          moneda: GTQ
+                    reestructuradosAlDia:
+                      creditos: 1
+                      saldoCapital:
+                        valor: "6000.00"
+                        moneda: GTQ
         "400":
           description: Parámetros de consulta inválidos
           content:
@@ -287,8 +379,8 @@ components:
       properties:
         valor:
           type: string
-          pattern: ^-?\d{1,13}\.\d{2}$
-          description: Importe con exactamente dos decimales
+          pattern: ^\d{1,13}\.\d{2}$
+          description: Importe no negativo con exactamente dos decimales
           examples:
             - "1004.62"
         moneda:
@@ -298,9 +390,30 @@ components:
         - valor
         - moneda
       additionalProperties: false
-      description: Objeto monetario expresado en quetzales
+      description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+        como texto para evitar errores de punto flotante.
       examples:
         - valor: "1004.62"
+          moneda: GTQ
+    DineroPositivo:
+      type: object
+      properties:
+        valor:
+          type: string
+          pattern: ^\d{1,13}\.\d{2}$
+          description: Importe mayor que cero con exactamente dos decimales
+          examples:
+            - "1011.88"
+        moneda:
+          type: string
+          const: GTQ
+      required:
+        - valor
+        - moneda
+      additionalProperties: false
+      description: Objeto monetario expresado en quetzales y mayor que cero
+      examples:
+        - valor: "1011.88"
           moneda: GTQ
     ErrorDetalle:
       type: object
@@ -384,7 +497,8 @@ components:
         - transferencia
         - agente_bancario
         - boleta_banco
-      description: Canal por el cual se recibió el pago
+      description: Canal institucional por el cual se recibió el pago. Es un catálogo
+        cerrado definido por Crédito Vecino.
     RegistrarPagoRequest:
       type: object
       properties:
@@ -393,10 +507,10 @@ components:
           properties:
             valor:
               type: string
-              pattern: ^-?\d{1,13}\.\d{2}$
-              description: Importe con exactamente dos decimales
+              pattern: ^\d{1,13}\.\d{2}$
+              description: Importe mayor que cero con exactamente dos decimales
               examples:
-                - "1004.62"
+                - "1011.88"
             moneda:
               type: string
               const: GTQ
@@ -404,9 +518,9 @@ components:
             - valor
             - moneda
           additionalProperties: false
-          description: Objeto monetario expresado en quetzales
+          description: Objeto monetario expresado en quetzales y mayor que cero
           examples:
-            - valor: "1004.62"
+            - valor: "1011.88"
               moneda: GTQ
         fechaPago:
           type: string
@@ -422,7 +536,8 @@ components:
             - transferencia
             - agente_bancario
             - boleta_banco
-          description: Canal por el cual se recibió el pago
+          description: Canal institucional por el cual se recibió el pago. Es un catálogo
+            cerrado definido por Crédito Vecino.
         referencia:
           description: Referencia o comprobante externo del pago
           examples:
@@ -434,7 +549,8 @@ components:
         - fechaPago
         - medio
       additionalProperties: false
-      description: Información enviada para registrar un pago
+      description: Información enviada para registrar un pago. El monto debe ser mayor
+        que cero.
     AplicacionDelPago:
       type: object
       properties:
@@ -443,8 +559,8 @@ components:
           properties:
             valor:
               type: string
-              pattern: ^-?\d{1,13}\.\d{2}$
-              description: Importe con exactamente dos decimales
+              pattern: ^\d{1,13}\.\d{2}$
+              description: Importe no negativo con exactamente dos decimales
               examples:
                 - "1004.62"
             moneda:
@@ -454,7 +570,8 @@ components:
             - valor
             - moneda
           additionalProperties: false
-          description: Objeto monetario expresado en quetzales
+          description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+            como texto para evitar errores de punto flotante.
           examples:
             - valor: "1004.62"
               moneda: GTQ
@@ -463,8 +580,8 @@ components:
           properties:
             valor:
               type: string
-              pattern: ^-?\d{1,13}\.\d{2}$
-              description: Importe con exactamente dos decimales
+              pattern: ^\d{1,13}\.\d{2}$
+              description: Importe no negativo con exactamente dos decimales
               examples:
                 - "1004.62"
             moneda:
@@ -474,7 +591,8 @@ components:
             - valor
             - moneda
           additionalProperties: false
-          description: Objeto monetario expresado en quetzales
+          description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+            como texto para evitar errores de punto flotante.
           examples:
             - valor: "1004.62"
               moneda: GTQ
@@ -483,8 +601,8 @@ components:
           properties:
             valor:
               type: string
-              pattern: ^-?\d{1,13}\.\d{2}$
-              description: Importe con exactamente dos decimales
+              pattern: ^\d{1,13}\.\d{2}$
+              description: Importe no negativo con exactamente dos decimales
               examples:
                 - "1004.62"
             moneda:
@@ -494,7 +612,8 @@ components:
             - valor
             - moneda
           additionalProperties: false
-          description: Objeto monetario expresado en quetzales
+          description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+            como texto para evitar errores de punto flotante.
           examples:
             - valor: "1004.62"
               moneda: GTQ
@@ -503,8 +622,8 @@ components:
           properties:
             valor:
               type: string
-              pattern: ^-?\d{1,13}\.\d{2}$
-              description: Importe con exactamente dos decimales
+              pattern: ^\d{1,13}\.\d{2}$
+              description: Importe no negativo con exactamente dos decimales
               examples:
                 - "1004.62"
             moneda:
@@ -514,7 +633,8 @@ components:
             - valor
             - moneda
           additionalProperties: false
-          description: Objeto monetario expresado en quetzales
+          description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+            como texto para evitar errores de punto flotante.
           examples:
             - valor: "1004.62"
               moneda: GTQ
@@ -523,8 +643,8 @@ components:
           properties:
             valor:
               type: string
-              pattern: ^-?\d{1,13}\.\d{2}$
-              description: Importe con exactamente dos decimales
+              pattern: ^\d{1,13}\.\d{2}$
+              description: Importe no negativo con exactamente dos decimales
               examples:
                 - "1004.62"
             moneda:
@@ -534,7 +654,8 @@ components:
             - valor
             - moneda
           additionalProperties: false
-          description: Objeto monetario expresado en quetzales
+          description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+            como texto para evitar errores de punto flotante.
           examples:
             - valor: "1004.62"
               moneda: GTQ
@@ -547,6 +668,12 @@ components:
       additionalProperties: false
       description: "Desglose según la prelación: gastos, interés moratorio, interés
         corriente, capital y excedente"
+    DestinoExcedente:
+      type: string
+      enum:
+        - amortizacion_capital
+        - cuotas_futuras
+      description: Política aplicada al dinero recibido por encima de lo adeudado
     TramoMora:
       type: string
       enum:
@@ -555,16 +682,31 @@ components:
         - mora_2
         - mora_3
         - vencido
-      description: Clasificación calculada a partir de los días de atraso
+      description: "Clasificación derivada de los días de atraso: ninguno (0), mora_1
+        (1-30), mora_2 (31-60), mora_3 (61-90) y vencido (91-120)"
     EstadoCredito:
+      type: string
+      enum:
+        - solicitado
+        - aprobado
+        - desembolsado
+        - vigente
+        - en_mora
+        - reestructurado
+        - rechazado
+        - anulado
+        - cancelado
+        - incobrable
+      description: Estado dentro del ciclo de vida completo del crédito
+    EstadoCreditoDespuesDePago:
       type: string
       enum:
         - vigente
         - en_mora
-        - cancelado
         - reestructurado
-        - incobrable
-      description: Estado actual del crédito
+        - cancelado
+      description: Estados válidos como resultado de aplicar un pago a un crédito que
+        admite cobros
     PagoRegistrado:
       type: object
       properties:
@@ -590,10 +732,10 @@ components:
           properties:
             valor:
               type: string
-              pattern: ^-?\d{1,13}\.\d{2}$
-              description: Importe con exactamente dos decimales
+              pattern: ^\d{1,13}\.\d{2}$
+              description: Importe mayor que cero con exactamente dos decimales
               examples:
-                - "1004.62"
+                - "1011.88"
             moneda:
               type: string
               const: GTQ
@@ -601,9 +743,9 @@ components:
             - valor
             - moneda
           additionalProperties: false
-          description: Objeto monetario expresado en quetzales
+          description: Objeto monetario expresado en quetzales y mayor que cero
           examples:
-            - valor: "1004.62"
+            - valor: "1011.88"
               moneda: GTQ
         aplicacion:
           type: object
@@ -613,8 +755,8 @@ components:
               properties:
                 valor:
                   type: string
-                  pattern: ^-?\d{1,13}\.\d{2}$
-                  description: Importe con exactamente dos decimales
+                  pattern: ^\d{1,13}\.\d{2}$
+                  description: Importe no negativo con exactamente dos decimales
                   examples:
                     - "1004.62"
                 moneda:
@@ -624,7 +766,8 @@ components:
                 - valor
                 - moneda
               additionalProperties: false
-              description: Objeto monetario expresado en quetzales
+              description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+                como texto para evitar errores de punto flotante.
               examples:
                 - valor: "1004.62"
                   moneda: GTQ
@@ -633,8 +776,8 @@ components:
               properties:
                 valor:
                   type: string
-                  pattern: ^-?\d{1,13}\.\d{2}$
-                  description: Importe con exactamente dos decimales
+                  pattern: ^\d{1,13}\.\d{2}$
+                  description: Importe no negativo con exactamente dos decimales
                   examples:
                     - "1004.62"
                 moneda:
@@ -644,7 +787,8 @@ components:
                 - valor
                 - moneda
               additionalProperties: false
-              description: Objeto monetario expresado en quetzales
+              description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+                como texto para evitar errores de punto flotante.
               examples:
                 - valor: "1004.62"
                   moneda: GTQ
@@ -653,8 +797,8 @@ components:
               properties:
                 valor:
                   type: string
-                  pattern: ^-?\d{1,13}\.\d{2}$
-                  description: Importe con exactamente dos decimales
+                  pattern: ^\d{1,13}\.\d{2}$
+                  description: Importe no negativo con exactamente dos decimales
                   examples:
                     - "1004.62"
                 moneda:
@@ -664,7 +808,8 @@ components:
                 - valor
                 - moneda
               additionalProperties: false
-              description: Objeto monetario expresado en quetzales
+              description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+                como texto para evitar errores de punto flotante.
               examples:
                 - valor: "1004.62"
                   moneda: GTQ
@@ -673,8 +818,8 @@ components:
               properties:
                 valor:
                   type: string
-                  pattern: ^-?\d{1,13}\.\d{2}$
-                  description: Importe con exactamente dos decimales
+                  pattern: ^\d{1,13}\.\d{2}$
+                  description: Importe no negativo con exactamente dos decimales
                   examples:
                     - "1004.62"
                 moneda:
@@ -684,7 +829,8 @@ components:
                 - valor
                 - moneda
               additionalProperties: false
-              description: Objeto monetario expresado en quetzales
+              description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+                como texto para evitar errores de punto flotante.
               examples:
                 - valor: "1004.62"
                   moneda: GTQ
@@ -693,8 +839,8 @@ components:
               properties:
                 valor:
                   type: string
-                  pattern: ^-?\d{1,13}\.\d{2}$
-                  description: Importe con exactamente dos decimales
+                  pattern: ^\d{1,13}\.\d{2}$
+                  description: Importe no negativo con exactamente dos decimales
                   examples:
                     - "1004.62"
                 moneda:
@@ -704,7 +850,8 @@ components:
                 - valor
                 - moneda
               additionalProperties: false
-              description: Objeto monetario expresado en quetzales
+              description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+                como texto para evitar errores de punto flotante.
               examples:
                 - valor: "1004.62"
                   moneda: GTQ
@@ -717,13 +864,24 @@ components:
           additionalProperties: false
           description: "Desglose según la prelación: gastos, interés moratorio, interés
             corriente, capital y excedente"
+        destinoExcedente:
+          anyOf:
+            - type: string
+              enum:
+                - amortizacion_capital
+                - cuotas_futuras
+              description: Política aplicada al dinero recibido por encima de lo adeudado
+            - type: "null"
+          description: Destino del excedente. Es null cuando el pago no produjo excedente.
+          examples:
+            - null
         saldoCapitalDespues:
           type: object
           properties:
             valor:
               type: string
-              pattern: ^-?\d{1,13}\.\d{2}$
-              description: Importe con exactamente dos decimales
+              pattern: ^\d{1,13}\.\d{2}$
+              description: Importe no negativo con exactamente dos decimales
               examples:
                 - "1004.62"
             moneda:
@@ -733,7 +891,8 @@ components:
             - valor
             - moneda
           additionalProperties: false
-          description: Objeto monetario expresado en quetzales
+          description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+            como texto para evitar errores de punto flotante.
           examples:
             - valor: "1004.62"
               moneda: GTQ
@@ -742,10 +901,10 @@ components:
           enum:
             - vigente
             - en_mora
-            - cancelado
             - reestructurado
-            - incobrable
-          description: Estado actual del crédito
+            - cancelado
+          description: Estados válidos como resultado de aplicar un pago a un crédito que
+            admite cobros
         tramoMora:
           type: string
           enum:
@@ -754,14 +913,15 @@ components:
             - mora_2
             - mora_3
             - vencido
-          description: Clasificación calculada a partir de los días de atraso
+          description: "Clasificación derivada de los días de atraso: ninguno (0), mora_1
+            (1-30), mora_2 (31-60), mora_3 (61-90) y vencido (91-120)"
         diasAtraso:
           type: integer
           minimum: 0
           maximum: 9007199254740991
           description: Cantidad de días de atraso después de aplicar el pago
           examples:
-            - 32
+            - 0
         reproducido:
           type: boolean
           description: Indica si se devolvió la respuesta de un pago registrado
@@ -774,6 +934,7 @@ components:
         - recibidoEn
         - montoRecibido
         - aplicacion
+        - destinoExcedente
         - saldoCapitalDespues
         - estadoCredito
         - tramoMora
@@ -782,9 +943,11 @@ components:
       additionalProperties: false
       description: Resultado obtenido después de registrar y aplicar un pago
     IncluirReestructurados:
-      default: false
-      description: Indica si los créditos reestructurados se incluyen en el cálculo
+      default: true
+      description: El indicador oficial siempre incluye los créditos reestructurados,
+        aunque estén al día
       type: boolean
+      const: true
     CarteraEnRiesgoQuery:
       type: object
       properties:
@@ -796,9 +959,11 @@ components:
           examples:
             - 2026-08-22
         incluirReestructurados:
-          default: false
-          description: Indica si los créditos reestructurados se incluyen en el cálculo
+          default: true
+          description: El indicador oficial siempre incluye los créditos reestructurados,
+            aunque estén al día
           type: boolean
+          const: true
       required:
         - fechaCorte
       additionalProperties: false
@@ -814,7 +979,8 @@ components:
             - mora_2
             - mora_3
             - vencido
-          description: Clasificación calculada a partir de los días de atraso
+          description: "Clasificación derivada de los días de atraso: ninguno (0), mora_1
+            (1-30), mora_2 (31-60), mora_3 (61-90) y vencido (91-120)"
         creditos:
           type: integer
           minimum: 0
@@ -825,8 +991,8 @@ components:
           properties:
             valor:
               type: string
-              pattern: ^-?\d{1,13}\.\d{2}$
-              description: Importe con exactamente dos decimales
+              pattern: ^\d{1,13}\.\d{2}$
+              description: Importe no negativo con exactamente dos decimales
               examples:
                 - "1004.62"
             moneda:
@@ -836,7 +1002,8 @@ components:
             - valor
             - moneda
           additionalProperties: false
-          description: Objeto monetario expresado en quetzales
+          description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+            como texto para evitar errores de punto flotante.
           examples:
             - valor: "1004.62"
               moneda: GTQ
@@ -845,6 +1012,41 @@ components:
         - creditos
         - saldoCapital
       additionalProperties: false
+    ReestructuradosAlDia:
+      type: object
+      properties:
+        creditos:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+          description: Cantidad de créditos reestructurados que se encuentran al día
+        saldoCapital:
+          type: object
+          properties:
+            valor:
+              type: string
+              pattern: ^\d{1,13}\.\d{2}$
+              description: Importe no negativo con exactamente dos decimales
+              examples:
+                - "1004.62"
+            moneda:
+              type: string
+              const: GTQ
+          required:
+            - valor
+            - moneda
+          additionalProperties: false
+          description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+            como texto para evitar errores de punto flotante.
+          examples:
+            - valor: "1004.62"
+              moneda: GTQ
+      required:
+        - creditos
+        - saldoCapital
+      additionalProperties: false
+      description: Créditos que cuentan como cartera en riesgo por estar
+        reestructurados, aunque no tengan atraso
     CarteraEnRiesgoResponse:
       type: object
       properties:
@@ -860,8 +1062,8 @@ components:
           properties:
             valor:
               type: string
-              pattern: ^-?\d{1,13}\.\d{2}$
-              description: Importe con exactamente dos decimales
+              pattern: ^\d{1,13}\.\d{2}$
+              description: Importe no negativo con exactamente dos decimales
               examples:
                 - "1004.62"
             moneda:
@@ -871,7 +1073,8 @@ components:
             - valor
             - moneda
           additionalProperties: false
-          description: Objeto monetario expresado en quetzales
+          description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+            como texto para evitar errores de punto flotante.
           examples:
             - valor: "1004.62"
               moneda: GTQ
@@ -880,8 +1083,8 @@ components:
           properties:
             valor:
               type: string
-              pattern: ^-?\d{1,13}\.\d{2}$
-              description: Importe con exactamente dos decimales
+              pattern: ^\d{1,13}\.\d{2}$
+              description: Importe no negativo con exactamente dos decimales
               examples:
                 - "1004.62"
             moneda:
@@ -891,7 +1094,8 @@ components:
             - valor
             - moneda
           additionalProperties: false
-          description: Objeto monetario expresado en quetzales
+          description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+            como texto para evitar errores de punto flotante.
           examples:
             - valor: "1004.62"
               moneda: GTQ
@@ -907,8 +1111,8 @@ components:
           properties:
             valor:
               type: string
-              pattern: ^-?\d{1,13}\.\d{2}$
-              description: Importe con exactamente dos decimales
+              pattern: ^\d{1,13}\.\d{2}$
+              description: Importe no negativo con exactamente dos decimales
               examples:
                 - "1004.62"
             moneda:
@@ -918,7 +1122,8 @@ components:
             - valor
             - moneda
           additionalProperties: false
-          description: Objeto monetario expresado en quetzales
+          description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+            como texto para evitar errores de punto flotante.
           examples:
             - valor: "1004.62"
               moneda: GTQ
@@ -935,7 +1140,8 @@ components:
                   - mora_2
                   - mora_3
                   - vencido
-                description: Clasificación calculada a partir de los días de atraso
+                description: "Clasificación derivada de los días de atraso: ninguno (0), mora_1
+                  (1-30), mora_2 (31-60), mora_3 (61-90) y vencido (91-120)"
               creditos:
                 type: integer
                 minimum: 0
@@ -946,8 +1152,8 @@ components:
                 properties:
                   valor:
                     type: string
-                    pattern: ^-?\d{1,13}\.\d{2}$
-                    description: Importe con exactamente dos decimales
+                    pattern: ^\d{1,13}\.\d{2}$
+                    description: Importe no negativo con exactamente dos decimales
                     examples:
                       - "1004.62"
                   moneda:
@@ -957,7 +1163,8 @@ components:
                   - valor
                   - moneda
                 additionalProperties: false
-                description: Objeto monetario expresado en quetzales
+                description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+                  como texto para evitar errores de punto flotante.
                 examples:
                   - valor: "1004.62"
                     moneda: GTQ
@@ -966,6 +1173,41 @@ components:
               - creditos
               - saldoCapital
             additionalProperties: false
+        reestructuradosAlDia:
+          type: object
+          properties:
+            creditos:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+              description: Cantidad de créditos reestructurados que se encuentran al día
+            saldoCapital:
+              type: object
+              properties:
+                valor:
+                  type: string
+                  pattern: ^\d{1,13}\.\d{2}$
+                  description: Importe no negativo con exactamente dos decimales
+                  examples:
+                    - "1004.62"
+                moneda:
+                  type: string
+                  const: GTQ
+              required:
+                - valor
+                - moneda
+              additionalProperties: false
+              description: Objeto monetario no negativo expresado en quetzales. El valor viaja
+                como texto para evitar errores de punto flotante.
+              examples:
+                - valor: "1004.62"
+                  moneda: GTQ
+          required:
+            - creditos
+            - saldoCapital
+          additionalProperties: false
+          description: Créditos que cuentan como cartera en riesgo por estar
+            reestructurados, aunque no tengan atraso
       required:
         - fechaCorte
         - carteraActiva
@@ -973,5 +1215,7 @@ components:
         - porcentajeEnRiesgo
         - dadoPorIncobrableEnElPeriodo
         - porTramo
+        - reestructuradosAlDia
       additionalProperties: false
-      description: Resultado del cálculo de cartera en riesgo
+      description: Resultado del cálculo de cartera en riesgo. El saldo en riesgo
+        incluye los tramos con más de 30 días y los créditos reestructurados.
